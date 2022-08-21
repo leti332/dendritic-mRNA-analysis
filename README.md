@@ -83,4 +83,5 @@ Saving files
 ## III. SPT Post-processing and Analysis
 ### A. Diatrack SPT post-processing and analysis
 #### i. R post-processing using modified scripts from [*sojourner* package ](https://github.com/sheng-liu/sojourner)
-#### ii. MSD Analysis using modified scripts from [Lerner et al., 2020.](https://data.mendeley.com/datasets/hxnhtttxpk/1)
+#### ii. MSD Analysis using modified scripts from [Lerner et al., 2020.](https://doi.org/10.1016/j.xpro.2020.100223)
+Requires download of the [Lerner et al. 2020 scripts](https://data.mendeley.com/datasets/hxnhtttxpk/1)
