@@ -11,6 +11,7 @@ Purpose: Analyze messenger RNA kinetics in neuronal dendrites
 <ins>Overview</ins>
 * A. Create Average Z-projection using Kymograph Analysis Scripts (MATLAB)
 * B. Generate dendritic outlines and crop movie (FIJI)
+* C. Filter Movies to enhance mRNA detection
 
 ### A. Generate Average Z-projection using Kymograph Analysis Script (MATLAB)
 Software Requirements:
@@ -393,6 +394,46 @@ function combDend(movies, movie1, movie2, output){
 	print("Completed");
 }
 ```
+### C. Filter Movies to enhance mRNA detection
+Overview: To enhance mRNA detection, segmented dendrites are filtered. We recommend trying a number of filters first to empirically determine which is the ideal filter for your dataset. Below are two scripts that apply filters. The same filter should be applied to all data to avoid artefacts introduced by changing filters. 
+
+Files (use one or the other)
+- Process_Folder_BandpassFFT_3-5px.ijm
+- RollingBall-5px_Filter.ijm
+
+**Process_Folder_BandpassFFT_3-5px.ijm**
+``js
+#@ File (label = "Input directory", style = "directory") input
+#@ File (label = "Output directory", style = "directory") output
+#@ String (label = "File suffix", value = ".tif") suffix
+
+
+processFolder(input);
+
+// function to scan folders/subfolders/files to find files with correct suffix
+function processFolder(input) {
+	list = getFileList(input);
+	list = Array.sort(list);
+	for (i = 0; i < list.length; i++) {
+		if(File.isDirectory(input + File.separator + list[i]))
+			processFolder(input + File.separator + list[i]);
+		if(endsWith(list[i], suffix))
+			processFile(input, output, list[i]);
+	}
+}
+
+function processFile(input, output, file) {
+	setBatchMode(true); // true prevents image windows from opening while the script is running
+	open(input + File.separator + file); //open file
+	
+	print("Processing: " + input + File.separator + file);
+	run("Bandpass Filter...", "filter_large=5 filter_small=3 suppress=None tolerance=5 autoscale saturate process");
+    run("Enhance Contrast", "saturated=0.35");
+	
+	print("Saving to: " + output);
+	saveAs("tiff", output + File.separator + "bandpass5-3px_" + file);
+}
+``
 **RollingBall-5px_Filter.ijm**
 ```js
 #@ File (label = "Input directory", style = "directory") input
@@ -434,7 +475,6 @@ function processFile(input, output, file) {
 ## II. Single Particle Tracking
 <ins>Overview</ins>
 * A. Diatrack - compatible with MSD and HMM analyses
-* B. SLIMFast - compatible with instantaneous velocity analysis
 
 ### A. Diatrack
 Overview
@@ -449,9 +489,16 @@ Saving files
 
 
 ## III. SPT Post-processing and Analysis
-### A. Diatrack SPT post-processing and analysis
+### A. mRNA track post-processing
+Overview: convert Diatrack mRNA trajectories into a common format that can utilized for trajectory analyses
+Software
+* R
+Files
+- Download all dependencies for sojourner package
+- DiatrackAnalyzerBYCELL_v2.Rmd
 #### i. R post-processing using *sojourner* package
-##### a. DiatrackAnalyzerBYCELL_v2.Rmd
+
+**DiatrackAnalyzerBYCELL_v2.Rmd**
 ###### 1. Import Data
 
 * must have folder with all matlab files together
@@ -794,7 +841,15 @@ for (i in seq_along(df_sec)){
     write.csv(data_TPM, fullFile)
 }
 ```
-#### ii. MSD Analysis using Two molecule single particle tracking analysis
+### B. mRNA track analysis using MSD based on Lerner et al. 2020
+Overview: Stratefy different motion types (e.g. confined vs. directed) using mean square displacement analysis based on Lerner et al. 2020. 
+Software
+* MATLAB
+Files
+- Download all scripts from Lerner et al. 2020
+- MSDAnalysis.m
+- 
+	
 ##### 1. Run skeleton.m
 **MSDAnalysis.m**
 ```Matlab
