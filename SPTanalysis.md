@@ -847,20 +847,26 @@ Software
 * MATLAB
 Files
 - Download all scripts from Lerner et al. 2020
-- MSDAnalysis.m
-- 
+- skeleton.m
+- ClassifyMotion.m
+- MSD_LinearFit.m
+	MSDAnalysis.m
+- MSD_ParabolicFit.m
+Directions
+Run skeleton.m
+Select MSD_LinearFit.m or MSD_ParabolicFit.m based on particle motion. 
 	
 ##### 1. Run skeleton.m
-**MSDAnalysis.m**
+**skeleton.m**
 ```Matlab
 %%
 %% Select Directory (Folder) with Trajectory Files
 rootFolder =  'C:\\Users\\letinunez\\Desktop\\'; % directs GUI to this folder first
 % myDir = uigetdir(rootFolder, 'Select Folder with trajectory files for MSD Analysis'); % uses GUI to get directory
 % myDir = '/Users/letinunez/Desktop/ANALYSIS/KO/'; %MAC
-myDir = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Rmarkdown files/TPM_files'; %MAC
-%myDir ='C:\Users\letinunez\Dropbox (EinsteinMed)\Projects\Project1-ZBP1KO\ACTBmRNAZBP1KOneurons\inst\Analysis\TPM_matlab_input\WT\'; %PC - Lab
-% myDir = 'C:\\Users\\letinunez\\Dropbox (EinsteinMed)\\Projects\\RNA-Protein_Dynamic_Modeling\\ACTBmRNAtracking_ZBP1KO\\PAPER_FINAL\\Data\\6_Track\\TPM CSV';% PC- HOME
+% myDir = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Rmarkdown files/TPM_files'; %MAC
+% myDir ='C:\Users\letinunez\Dropbox (EinsteinMed)\Projects\Project1-ZBP1KO\ACTBmRNAZBP1KOneurons\inst\Analysis\TPM_matlab_input\WT\'; %PC - Lab
+myDir = 'E:\New Dropbox\Dropbox (EinsteinMed)\ACTBmRNAZBP1KOneurons\inst\Rmarkdown files\TPM_files';% PC- HOME
 myFiles = dir(fullfile(myDir,'*.csv')); %gets all csv files in struct
 
 %% Save Files
@@ -868,61 +874,11 @@ myFiles = dir(fullfile(myDir,'*.csv')); %gets all csv files in struct
 % Output Location for Saved Files
 % OutputPath = uigetdir(rootFolder, 'Select Output Folder for MSD Results'); % uses GUI to get directory
 % OutputPath = '/Users/letinunez/Desktop/ANALYSIS/kymograph/'; %MAC
-OutputPath = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_28APR2022'; %MAC
+% OutputPath = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_28APR2022'; %MAC
 % OutputPath ='C:\Users\letinunez\Dropbox (EinsteinMed)\Projects\Project1-ZBP1KO\ACTBmRNAZBP1KOneurons\inst\Analysis\TPM_matlab_output\'; % PC - Lab
-% OutputPath = 'C:\\Users\\letinunez\\Dropbox (EinsteinMed)\\Projects\\RNA-Protein_Dynamic_Modeling\\ACTBmRNAtracking_ZBP1KO\\PAPER_FINAL\\Analysis\\MSD Analysis';% PC- HOME
+OutputPath = 'E:\New Dropbox\Dropbox (EinsteinMed)\ACTBmRNAZBP1KOneurons\inst\Analysis_29APR2022';% PC- HOME
 
 %% Input Variables for MSD
-% ------------------------------------------------------------
-% FILE TYPE (TrackMate or SlimFast Format)
-inputVar.fileType = 1; %If the track file is an .xml file from TrackMate.
-% SPACE UNITS (pixels or microns)
-inputVar.spaceunits = 0; % 0 - space units in pixels; 1 - space units in microns
-inputVar.frameinterval = 1; % Frame interval in secs (eg. 100 msec = 0.1 sec)
-% TIME UNITS (frames or seconds)
-inputVar.timeunits = 0; % 0 - time units in frames; 1 - time units in seconds
-inputVar.pixelsize = 0.1067; % Pixel size in microns (e.g. 106.7 nm = 0.1067 um)
-% TRAJECTORY DIMENSIONS
-inputVar.dim = 2; % 2 - 2D; 3 - 3D
-% FILTERING PARAMETERS - Minimum Track Length
-inputVar.FilterMinLen = 7; %Minimum track length in frames to take the track into account
-% ------------------------------------------------------------
-% MSD FITTING PARAMETERS
-% Linear Fitting
-% Number of points used of the T-MSD for fitting the Diffussion Coefficient. (LINEAR FITTING) The minimum 3 points for being able to calculate the Confidence Intervals
-inputVar.TMSDfitpt = 4;
-inputVar.TEMSDfitpt = 4;
-
-% Logarithmic Fitting
-% Number of points used of the TE-MSD for fitting the Diffussion Coefficient. (POWER-LAW FITTING).
-inputVar.Tloglogfitpt = 20;
-inputVar.maxAlphaconf = 0.7; %Maximum alpha value for the power-fitting of the TE-MSD in order to consider Confined Motion
-inputVar.minAlphadir = 1; %Minimum alpha value for the power-fitting of the TE-MSD in order to consider Directed Motion
-%Everything in the middle will be consider as Brownian Motion
-
-% R-Squared Threshold
-inputVar.R2LIMIT = 0.7; %Lower limit of the r-squared value for the fitting of the T-MSD and TE-MSD. The Tracks with r-squared lower than that won't be classified.
-% ------------------------------------------------------------
-% BUTTERFLY PARAMETERS
-inputVar.butterfly_jumpthreshold = 1.5; %For identifying butterfly trajectories. One Track MUST jump more than its own (average_jump + jump_threshold*std_jump) to be considered a Butterfly track
-inputVar.butterfly_minDist = 8; %For identifying butterfly trajectories. One Track MUST travell a total distance bigger than its own average_jump*minim_dist to be considered a Butterfly track
-inputVar.butterfly_Conf2JumpThr = 0; %A Butterfly track need to have a Jump equal or bigger than the average radius of confinement of its confined segments multiplied by Conf2JumpThr.
-inputVar.butterfly_OutPercentage = 30; % Minimum Percentage of points that a JUMP must have OUTSIDE the previous and posterior polygon (CONVEXHULL) to be considered an OUTER Segment. (Number from 0 to 100).
-inputVar.butterfly_Nsliding = 3; %Number of points to check linearity of segments.
-inputVar.butterfly_P_min_linear = 0.8; %P minimum to consider that a segment is linear. Number between 0 and 1.
-inputVar.butterfly_angleTH = 45; %Minimum Angle for considering a jump as "directed" in butterfly tracks (degrees) Direct(>angleTH) or non-direct(<angleTH)
-inputVar.butterfly_MaxJumpConf = 0.18; %Maximum jump in (µm) than a confined segment of a butterfly track can have. (Use for track segmentation).
-inputVar.butterfly_MinNumPtConfSeg = 4; %Minimum number of points that a confined segment of a butterfly track can have. (The tracks that doesn't fulfill this condition will be discarded)
-
-% ------------------------------------------------------------
-% CONFINED PARAMETERS
-% Confined Jump Threshold
-inputVar.jumpConf = 0.1; %Value used to separate confined trajectories into two groups [Average Jump (µm)].
-% Circle Confined Diffusion
-inputVar.ConfDiffOffset = 0.001; %This is the minimum MSD value. It depens on the localization precision. level = 4*(Loc_precition^2) [in µm].
-inputVar.ConfDiffNum_points = 12; %Number of points for fitting the confined diffussion circle model to the TE-MSD.
-inputVar.ConfDiffD0 = 0.05; %Starting value for the least squares fitting for the Diffusion Coefficient (µm^2/s) on the Confined Circle Diffusion Model
-inputVar.ConfDiffR0 = 0.05; %Starting value for the least squares fitting for the Radius of Confinement (µm) on the Confined Circle Diffusion Model
 
 
 %% Loop through Files in Directory (Folder)
@@ -952,7 +908,6 @@ end
 close(f) %closes progress bar
 
 fprintf('Finished \n')
-
 ```
 **ClassifyMotion.m**
 ```Matlab
@@ -1835,7 +1790,8 @@ end
 % %% Saving Information
   % settings
     %directory_name = uigetdir('C:\Users\letinunez\Documents\');% select output folder
-    directory_name ='/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_28APR2022'; %MAC
+    % directory_name ='/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_28APR2022'; %MAC
+    directory_name ='E:\New Dropbox\Dropbox (EinsteinMed)\ACTBmRNAZBP1KOneurons\inst\Analysis_29APR2022'; % PC- HOME
     date = datestr(datetime, 'yyyy-mm-dd_HH-MM');
 
   % Folder and File Names
@@ -1853,7 +1809,7 @@ end
 % set data type set
 %motion = 1;
 % 1 - AllTracks
-% 2 - Confined
+% 2 - Confined 
 % 3 - Confined - H
 % 4 - Confined - L
 % 5 - Directed
@@ -1875,14 +1831,15 @@ type.t2 = 'KO'; % condition 2
 
 
 
-%startlocn = uigetdir('C:\Users\letinunez\Documents\'); % save selected files together as a group
-startlocn = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_24APR2022/MSD_Results';
+% startlocn = uigetdir('C:\Users\letinunez\Documents\'); % save selected files together as a group
+% startlocn = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_24APR2022/MSD_Results';
+startlocn = 'E:\New Dropbox\Dropbox (EinsteinMed)\ACTBmRNAZBP1KOneurons\inst\Analysis_29APR2022\MSD_Results'; % PC- HOME
 %Save_Results = 0; % 1 - yes save results; 0 - no
 %File_name = 'msd_results'; % prefix to msd .csv files
 
 
-%%
-
+%% 
+fprintf('Initializing Input Variables\n');
 %------------------------------------------------------------------
 %Numerical Inputs---------------------------------------------------
 %------------------------------------------------------------------
@@ -1891,7 +1848,7 @@ Frame_interval = 0.10; %Exposure time in seconds
 
 TMSD_fitting_points = 3;   %Minimum 3 point for being able to calculate the Confidence Intervals
 TEMSD_fitting_points = 3;  %Minimum 3 point for being able to calculate the Confidence Intervals
-TLOGLOG_fitting_points = 20;
+TLOGLOG_fitting_points = 20; 
 
 R2LIMIT = 0.7; %R-squared minimum value from the D fits on each T-MSD Curve.
 
@@ -1901,7 +1858,7 @@ R2LIMIT = 0.7; %R-squared minimum value from the D fits on each T-MSD Curve.
 %For the Confined Circle Diffusion Model Fitting---------------------------------------------------
 %---------------------------------------------------------------------
 num_points = 10; %Number of points for fitting the confined diffussion circle model to the TE-MSD.
-level = 0.001; %This is the minimum MSD value. It depens on the localization precision. level = 4*(Loc_precition^2) [in ?m].
+level = 0.001; %This is the minimum MSD value. It depens on the localization precision. level = 4*(Loc_precition^2) [in ?m]. 
 D0 = 0.05; %Starting value for the least squares fitting for the Diffusion Coefficient (?m^2/s)
 R0 = 0.05; %Starting value for the least squares fitting for the Radius of Confinement (?m)
 
@@ -1914,7 +1871,7 @@ Radius_interval = [30 60]; %Radius interval (in nm) in order to divide tracks in
 %----------------------------------------------------------------------
 % Dcoeffs = {};
 datatypes = fieldnames(type);
-ntypes = size(datatypes,1);
+ntypes = size(datatypes,1);    
 for i=1:ntypes;
 files{i}= Select1DataGroup(type.(datatypes{i}),'mat',startlocn);
 end
@@ -1923,13 +1880,17 @@ end
 SPACE_UNITS = 'µm'; %This is just for visualization purposes
 TIME_UNITS = 's'; %This is just for visualization purposes
 ma = msdanalyzer(2, SPACE_UNITS, TIME_UNITS);
+fprintf('Starting MSD Linear Fit\n');
 
 for i=1:ntypes;
 MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
-
-    for c=1:size(files{i}.data,1);
+f = waitbar(0, 'Starting');
+n = size(files{i}.data,1);
+    for c=1:n;
         MSD_Results_prov{i}{c} = load(strcat(files{i}.data{c,2},files{i}.data{c,1}));
         [folder, baseName,ext] = fileparts(files{1,i}.data{c,1});
+        fprintf(1, 'Now reading %s\n', baseName);
+
         ma = MSD_Results_prov{1,i}{1,c}.ma;
         figure
         try
@@ -1950,10 +1911,13 @@ MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
         figure
         ma.plotMeanMSD(gca, true)
         title(baseName);
+        % Adds linear regression to MeanMSD plot
+        %[fo, gof] = ma.fitMeanMSD( 0.25 );
+        %plot(fo)
         filename = strcat(baseName, '_PlotMeanMSD');
         saveas(gcf, fullfile(folderName,filename))
         saveas(gcf, fullfile(folderName,filename), 'tif')
-
+        
         % Linear Fit
         ma = MSD_Results_prov{1,i}{1,c}.ma.TMSD(TMSD_fitting_points);
         good_enough_fit_Ds_2{1,i} = find(ma.lfit.r2fit >= R2LIMIT);
@@ -1963,16 +1927,22 @@ MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
         fprintf('D = %.3g +/- %.3g (mean +/- std, N = %d)\n', ...
         Dmean_2{1,i}, Dstd_2{1,i}, length(good_enough_fit_Ds_2{1,i}));
         Ds_2{1,i} = ma.lfit.a(good_enough_fit_Ds_2{1,i})/ 2 / ma.n_dim;
-
+        
         filename = strcat(baseName,'_DiffusionCoeff.csv');
         dlmwrite(fullfile(folderName,filename),Ds_2{1,i})
         catch
             fprintf('Error - Too few Tracks');
         end
+        % Progress Bar
+        waitbar(c/n, f, sprintf('%s Progress: %d %%',type.(datatypes{i}), floor(c/n*100)));
+        pause(0.1);
         close all
-        clearvars -except folderName MSD_Results files i c SPACE_UNITS TIME_UNITS ma datatypes ntypes TMSD_fitting_points R2LIMIT n_dim
+        clearvars -except folderName MSD_Results files i c SPACE_UNITS TIME_UNITS ma datatypes ntypes TMSD_fitting_points R2LIMIT n_dim n f type
+     
     end
+    close(f) %closes progress bar
 end
+fprintf('Finished MSD Linear Fit\n');
 %% All Tracks - Histogram of Diffusion Coefficients - WORKING
 
 
@@ -2004,13 +1974,15 @@ end
 ```
 **MSD_ParabolicFit.m**
 ```Matlab
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% ALL TRACKS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% Saving Information
   % settings
-    %directory_name = uigetdir('C:\Users\letinunez\Documents\');% select output folder
-    directory_name ='/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_24APR2022'; %MAC
+  %  directory_name = uigetdir('C:\Users\letinunez\Documents\');% select output folder
+  %  directory_name ='/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_24APR2022'; %MAC
+    directory_name ='E:\New Dropbox\Dropbox (EinsteinMed)\ACTBmRNAZBP1KOneurons\inst\Analysis_29APR2022'; % PC- HOME
+
     date = datestr(datetime, 'yyyy-mm-dd_HH-MM');
 
   % Folder and File Names
@@ -2028,7 +2000,7 @@ end
 % set data type set
 %motion = 1;
 % 1 - AllTracks
-% 2 - Confined
+% 2 - Confined 
 % 3 - Confined - H
 % 4 - Confined - L
 % 5 - Directed
@@ -2056,7 +2028,7 @@ startlocn = '/Users/letinunez/ACTBmRNAZBP1KOneurons/inst/Analysis_24APR2022/MSD_
 %File_name = 'msd_results'; % prefix to msd .csv files
 
 
-%%
+%% 
 
 %------------------------------------------------------------------
 %Numerical Inputs---------------------------------------------------
@@ -2066,7 +2038,7 @@ Frame_interval = 0.10; %Exposure time in seconds
 
 TMSD_fitting_points = 3;   %Minimum 3 point for being able to calculate the Confidence Intervals
 TEMSD_fitting_points = 3;  %Minimum 3 point for being able to calculate the Confidence Intervals
-TLOGLOG_fitting_points = 20;
+TLOGLOG_fitting_points = 20; 
 
 R2LIMIT = 0.7; %R-squared minimum value from the D fits on each T-MSD Curve.
 
@@ -2076,7 +2048,7 @@ R2LIMIT = 0.7; %R-squared minimum value from the D fits on each T-MSD Curve.
 %For the Confined Circle Diffusion Model Fitting---------------------------------------------------
 %---------------------------------------------------------------------
 num_points = 10; %Number of points for fitting the confined diffussion circle model to the TE-MSD.
-level = 0.001; %This is the minimum MSD value. It depens on the localization precision. level = 4*(Loc_precition^2) [in ?m].
+level = 0.001; %This is the minimum MSD value. It depens on the localization precision. level = 4*(Loc_precition^2) [in ?m]. 
 D0 = 0.05; %Starting value for the least squares fitting for the Diffusion Coefficient (?m^2/s)
 R0 = 0.05; %Starting value for the least squares fitting for the Radius of Confinement (?m)
 
@@ -2089,7 +2061,7 @@ Radius_interval = [30 60]; %Radius interval (in nm) in order to divide tracks in
 %----------------------------------------------------------------------
 % Dcoeffs = {};
 datatypes = fieldnames(type);
-ntypes = size(datatypes,1);
+ntypes = size(datatypes,1);    
 for i=1:ntypes;
 files{i}= Select1DataGroup(type.(datatypes{i}),'mat',startlocn);
 end
@@ -2098,11 +2070,13 @@ end
 SPACE_UNITS = 'µm'; %This is just for visualization purposes
 TIME_UNITS = 's'; %This is just for visualization purposes
 ma = msdanalyzer(2, SPACE_UNITS, TIME_UNITS);
+fprintf('Starting MSD Parabolic Fit\n');
 
 for i=1:ntypes;
 MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
-
-    for c=1:size(files{i}.data,1);
+f = waitbar(0, 'Starting');
+n = size(files{i}.data,1);
+    for c=1:n;
         MSD_Results_prov{i}{c} = load(strcat(files{i}.data{c,2},files{i}.data{c,1}));
         [folder, baseName,ext] = fileparts(files{1,i}.data{c,1});
         ma = MSD_Results_prov{1,i}{1,c}.ma;
@@ -2115,26 +2089,26 @@ MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
 %         filename = strcat(baseName, '_PlotTracks');
 %         saveas(gcf, fullfile(folderName,filename))
 %         saveas(gcf, fullfile(folderName,filename), 'tif')
-%
+% 
 %         figure
 %         ma.plotMSD
 %         title(baseName);
 %         filename = strcat(baseName, '_PlotMSD');
 %         saveas(gcf, fullfile(folderName,filename))
 %         saveas(gcf, fullfile(folderName,filename), 'tif')
-%
+% 
 %         figure
 %         ma.plotMeanMSD(gca, true)
 %         title(baseName);
 %         filename = strcat(baseName, '_PlotMeanMSD');
 %         saveas(gcf, fullfile(folderName,filename))
 %         saveas(gcf, fullfile(folderName,filename), 'tif')
-
+        
         %% Add Parabolic Fitting to Directed Motion Tracks
         A = rmmissing(ma.getMeanMSD); % get Mean MSD and remove missing values (e.g. NaN)
         SPACE_UNITS = 'µm'; %This is just for visualization purposes
         TIME_UNITS = 's'; %This is just for visualization purposes
-
+    
         t = A(:, 1); % delay vector
         msd = A(:,2); % msd
         std_msd = A(:,3); % we will use inverse of the std as weights for the fit
@@ -2171,23 +2145,28 @@ MSD_Results{i}.ma = msdanalyzer(2, 'um', 's');  %Initialize MSD analizer
         % Mean velocity
         vm = 0.05; % µm/s
 
-        fprintf('D = %.3g [ %.3g - %.3g ] %s, random displacement is %.3g %s\n', ...
+        fprintf('\nD = %.3g [ %.3g - %.3g ] %s, random displacement is %.3g %s\n', ...
         Dfit, Dci(1), Dci(2), [SPACE_UNITS '²/' TIME_UNITS], D, [SPACE_UNITS '²/' TIME_UNITS]);
 
         fprintf('V = %.3g [ %.3g - %.3g ] %s, random velocity is %.3g %s\n', ...
         Vfit, Vci(1), Vci(2), [SPACE_UNITS '/' TIME_UNITS], vm, [SPACE_UNITS '/' TIME_UNITS]);
-
-
-
+ 
+       
+        
         filename = strcat(baseName,'_DiffusionCoeff.csv');
         dlmwrite(fullfile(folderName,filename),Dfit)
         catch
             fprintf('Error - Too few Tracks');
         end
+        waitbar(c/n, f, sprintf('%s Progress: %d %%',type.(datatypes{i}), floor(c/n*100)));
+        pause(0.1);
         close all
-        clearvars -except folderName MSD_Results files i c SPACE_UNITS TIME_UNITS ma datatypes ntypes TMSD_fitting_points R2LIMIT n_dim Dfit
+        clearvars -except folderName MSD_Results files i c SPACE_UNITS TIME_UNITS ma datatypes ntypes TMSD_fitting_points R2LIMIT n_dim Dfit n f type
     end
+    close(f) %closes progress bar
 end
+fprintf('Finished MSD Parabolic Fit\n');
+
 %% All Tracks - Histogram of Diffusion Coefficients - WORKING
 
 
@@ -2214,6 +2193,6 @@ end
 %filename = strcat(name,'_DiffusionCoeff_AllTracks.csv');
 %dlmwrite(fullfile(folderName,filename),log10(Ds_2{1,2}(idx2_2)))
 
-%% Ideally export data to csv so that there can be one file with the diffusion coefficients
+%% Ideallyy export data to csv so that there can be one file with the diffusion coefficients
 % check if file exists
 ```
