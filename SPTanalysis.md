@@ -474,7 +474,7 @@ function processFile(input, output, file) {
 
 ## II. Single Particle Tracking
 <ins>Overview</ins>
-* A. Diatrack - compatible with MSD and HMM analyses
+* A. Diatrack
 
 ### A. Diatrack
 Overview
